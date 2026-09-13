@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "test": "tsx src/__tests__/workspace.test.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "check-types": "tsc --noEmit"
