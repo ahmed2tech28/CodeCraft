@@ -10,6 +10,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "test": "tsx src/__tests__/sandbox.test.ts",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -20,6 +21,7 @@
     "@repo/typescript-config": "workspace:*",
     "@types/dockerode": "^3.3.34",
     "@types/node": "^20.14.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.5.0"
   }
 }
