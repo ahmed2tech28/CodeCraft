@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Shield, Cpu, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Sparkles, Shield, Cpu, ArrowRight, CheckCircle2, AlertCircle, Zap, Gift } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
+import { SUPPORTED_MODELS, OPENROUTER_FREE_MODELS } from '@codecraft/shared';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -16,8 +17,8 @@ export default function OnboardingPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic' | 'openrouter' | 'ollama'>('openai');
-  const [aiModel, setAiModel] = useState('gpt-4o-mini');
+  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic' | 'openrouter' | 'ollama'>('openrouter');
+  const [aiModel, setAiModel] = useState('google/gemma-4-31b-it:free');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
@@ -79,6 +80,8 @@ export default function OnboardingPage() {
       setLoading(false);
     }
   };
+
+  const currentProviderConfig = SUPPORTED_MODELS[aiProvider];
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-6 relative overflow-hidden">
@@ -186,7 +189,7 @@ export default function OnboardingPage() {
                 <span>Configure AI Model Provider</span>
               </div>
               <p className="text-xs text-zinc-400 mb-6 leading-relaxed">
-                Choose the model provider for your autonomous coding agents. You can change this later in settings.
+                Choose your AI model. OpenRouter offers high-performance <strong className="text-emerald-400">100% Free models</strong> (Gemma 4, Cohere North Code, Nex AGI) for autonomous agent execution.
               </p>
 
               <div className="space-y-4">
@@ -197,40 +200,86 @@ export default function OnboardingPage() {
                     onChange={(e) => {
                       const p = e.target.value as 'openai' | 'anthropic' | 'openrouter' | 'ollama';
                       setAiProvider(p);
-                      if (p === 'openai') setAiModel('gpt-4o-mini');
-                      else if (p === 'anthropic') setAiModel('claude-3-5-sonnet-latest');
-                      else if (p === 'openrouter') setAiModel('anthropic/claude-3.5-sonnet');
-                      else if (p === 'ollama') setAiModel('qwen2.5-coder:latest');
+                      const def = SUPPORTED_MODELS[p]?.defaultModel || 'gpt-4o-mini';
+                      setAiModel(def);
                     }}
                     className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
                   >
+                    <option value="openrouter">OpenRouter (Free Models & All Frontier Models)</option>
                     <option value="openai">OpenAI (GPT-4o, GPT-4o Mini)</option>
                     <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
-                    <option value="openrouter">OpenRouter (DeepSeek, Llama, Gemini)</option>
                     <option value="ollama">Local Ollama (Offline / Private)</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Model Name</label>
-                  <input
-                    type="text"
-                    value={aiModel}
-                    onChange={(e) => setAiModel(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
-                  />
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-medium text-zinc-300">Model Selection</label>
+                    {aiProvider === 'openrouter' && (
+                      <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                        <Gift className="w-3 h-3" />
+                        <span>Free Models Available</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {currentProviderConfig?.modelOptions ? (
+                    <select
+                      value={aiModel}
+                      onChange={(e) => setAiModel(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
+                    >
+                      <optgroup label="✨ Free Models (No Cost)">
+                        {currentProviderConfig.modelOptions
+                          .filter((m) => m.isFree)
+                          .map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                      <optgroup label="🚀 Frontier Models">
+                        {currentProviderConfig.modelOptions
+                          .filter((m) => !m.isFree)
+                          .map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                    </select>
+                  ) : (
+                    <select
+                      value={aiModel}
+                      onChange={(e) => setAiModel(e.target.value)}
+                      className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
+                    >
+                      {currentProviderConfig?.models.map((m) => (
+                        <option key={m} value={m}>
+                          {m}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 {aiProvider !== 'ollama' && (
                   <div>
-                    <label className="block text-xs font-medium text-zinc-300 mb-1.5">API Key</label>
+                    <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                      {aiProvider === 'openrouter' ? 'OpenRouter API Key (Get from openrouter.ai/keys)' : 'API Key'}
+                    </label>
                     <input
                       type="password"
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="sk-..."
+                      placeholder={aiProvider === 'openrouter' ? 'sk-or-v1-...' : 'sk-...'}
                       className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100 placeholder:text-zinc-600"
                     />
+                    {aiProvider === 'openrouter' && (
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Free models on OpenRouter require a free OpenRouter account key ($0 balance is fine).
+                      </p>
+                    )}
                   </div>
                 )}
 

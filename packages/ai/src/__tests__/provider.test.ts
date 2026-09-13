@@ -39,7 +39,18 @@ async function runAiTests() {
   }
   console.log('  ✓ Ollama baseURL auto-configuration verified');
 
-  // 4. Test Model Factory instantiation for all providers
+  // 4. Test OpenRouter Free Model Config
+  const openrouterFreeConfig = resolveAndValidateConfig({
+    provider: 'openrouter',
+    model: 'google/gemma-4-31b-it:free',
+    apiKey: 'sk-or-v1-mock',
+  });
+  if (openrouterFreeConfig.provider !== 'openrouter' || openrouterFreeConfig.model !== 'google/gemma-4-31b-it:free') {
+    throw new Error('OpenRouter free model config resolution failed');
+  }
+  console.log('  ✓ OpenRouter free model (google/gemma-4-31b-it:free) configured');
+
+  // 5. Test Model Factory instantiation for all providers
   const openaiInstance = getLanguageModel({ provider: 'openai', model: 'gpt-4o-mini', apiKey: 'mock' });
   if (!openaiInstance.model || openaiInstance.model.provider !== 'openai.chat') {
     throw new Error('OpenAI model creation failed');
@@ -58,13 +69,13 @@ async function runAiTests() {
 
   const openrouterInstance = getLanguageModel({
     provider: 'openrouter',
-    model: 'anthropic/claude-3.5-sonnet',
+    model: 'google/gemma-4-31b-it:free',
     apiKey: 'mock',
   });
   if (!openrouterInstance.model) {
-    throw new Error('OpenRouter model creation failed');
+    throw new Error('OpenRouter free model instance creation failed');
   }
-  console.log('  ✓ OpenRouter language model instance instantiated');
+  console.log('  ✓ OpenRouter free language model instance instantiated');
 
   const ollamaInstance = getLanguageModel({
     provider: 'ollama',
@@ -76,13 +87,12 @@ async function runAiTests() {
   }
   console.log('  ✓ Ollama language model instance instantiated');
 
-  // 5. Test testProviderConnection handles offline/invalid mock keys gracefully
+  // 6. Test testProviderConnection handles offline/invalid mock keys gracefully
   const testResult = await testProviderConnection({
     provider: 'openai',
     model: 'gpt-4o-mini',
     apiKey: 'invalid-mock-key-for-test',
   });
-  // Since key is invalid / offline, testResult should return success: false without unhandled crash
   if (testResult.success !== false || !testResult.error) {
     throw new Error('Expected invalid connection test to return structured error');
   }
