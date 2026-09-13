@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "test": "tsx src/__tests__/workspace.test.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "tsx src/index.ts",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -23,13 +23,13 @@
     "fastify": "^5.2.1",
     "fs-extra": "^11.3.0",
     "simple-git": "^3.27.0",
+    "tsx": "^4.19.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.14.0",
-    "tsx": "^4.19.3",
     "typescript": "^5.5.0"
   }
 }
