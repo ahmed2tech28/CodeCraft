@@ -21,7 +21,7 @@ Build the workspace filesystem manager that initializes, reads, updates, and str
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/server test
+pnpm --filter server test
 ```
 
 ---

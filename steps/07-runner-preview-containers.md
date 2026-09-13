@@ -14,14 +14,14 @@ Implement the distinct container architecture separating temporary **Runner** co
 
 ## 3. Dependencies
 - `http-proxy` or `@fastify/http-proxy` (For forwarding HTTP/WebSocket preview traffic)
-- `@loveable/sandbox`
+- `@codecraft/sandbox`
 
 ---
 
 ## 4. Commands to Run
 ```bash
-docker build -t loveable-preview:latest -f docker/preview/Dockerfile .
-pnpm --filter @loveable/server test
+docker build -t codecraft-preview:latest -f docker/preview/Dockerfile .
+pnpm --filter server test
 ```
 
 ---

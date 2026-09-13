@@ -20,10 +20,10 @@ Build the core autonomous coding agent loop in `packages/agent`. Equipping the L
 ---
 
 ## 3. Dependencies
-- `@loveable/ai`
-- `@loveable/sandbox`
-- `@loveable/db`
-- `@loveable/shared`
+- `@codecraft/ai`
+- `@codecraft/sandbox`
+- `@codecraft/db`
+- `@codecraft/shared`
 - `ai` (Vercel AI SDK `generateText` / `streamText` tool calls)
 - `zod`
 
@@ -31,7 +31,7 @@ Build the core autonomous coding agent loop in `packages/agent`. Equipping the L
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/agent test
+pnpm --filter @codecraft/agent test
 ```
 
 ---

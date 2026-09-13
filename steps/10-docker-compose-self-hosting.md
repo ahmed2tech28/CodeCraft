@@ -41,7 +41,7 @@ docker compose logs -f
    ```yaml
    version: '3.8'
    services:
-     loveable:
+     codecraft:
        build:
          context: .
          dockerfile: docker/app/Dockerfile
@@ -66,7 +66,7 @@ docker compose logs -f
 
 ## 7. Acceptance Criteria
 - Running `docker compose up -d` successfully builds and launches the application container.
-- Navigating to `http://localhost:3000` opens the loveable-clone interface ready to receive prompts.
+- Navigating to `http://localhost:3000` opens the CodeCraft interface ready to receive prompts.
 - Pre-flight check detects missing API keys or unmounted Docker sockets and outputs explicit setup instructions in stdout logs.
 
 ---

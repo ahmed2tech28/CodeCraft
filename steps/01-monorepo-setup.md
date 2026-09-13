@@ -20,8 +20,8 @@ Establish a clean, robust monorepo architecture using `pnpm` workspaces and `Tur
 ## 3. Dependencies
 - Root: `turbo`, `typescript`, `prettier`, `eslint`
 - `packages/shared`: `zod`
-- `apps/server`: `fastify` (or `express`), `dotenv`, `@loveable/shared`
-- `apps/web`: `next`, `react`, `react-dom`, `tailwindcss`, `@loveable/shared`
+- `apps/server`: `fastify` (or `express`), `dotenv`, `@codecraft/shared`
+- `apps/web`: `next`, `react`, `react-dom`, `tailwindcss`, `@codecraft/shared`
 
 ---
 
@@ -55,7 +55,7 @@ pnpm dev
 ## 7. Acceptance Criteria
 - `pnpm install` resolves dependencies without warnings or errors.
 - `pnpm build` successfully compiles all packages and applications via Turborepo.
-- `apps/server` can import types from `@loveable/shared`.
+- `apps/server` can import types from `@codecraft/shared`.
 - `apps/web` can build and launch on `localhost:3000`.
 
 ---

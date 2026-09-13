@@ -2,7 +2,7 @@
 
 ## Executive Overview
 
-This document serves as the master blueprint for building **Loveable Clone (AI App Builder)** — a professional, open-source, self-hostable AI coding platform inspired by Lovable and Bolt.new. 
+This document serves as the master blueprint for building **CodeCraft (AI App Builder)** — a professional, open-source, self-hostable AI coding platform inspired by Lovable and Bolt.new. 
 
 The core experience:
 1. **First-Time Self-Hosted Onboarding**: Upon first launch, the platform automatically detects an uninitialized instance and guides the host through a slick setup wizard to create the **Super User (Admin)** account and configure their AI model provider API keys.

@@ -22,7 +22,7 @@ Apply core security mitigations, observability logging, token usage tracking, an
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/server test
+pnpm --filter server test
 pnpm test:e2e
 ```
 

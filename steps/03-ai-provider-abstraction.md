@@ -29,7 +29,7 @@ Build a flexible, pluggable AI provider abstraction package (`packages/ai`) that
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/ai test
+pnpm --filter @codecraft/ai test
 ```
 
 ---

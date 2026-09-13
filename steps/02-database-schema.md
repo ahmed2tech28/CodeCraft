@@ -28,8 +28,8 @@ Design and implement the SQLite database persistence layer using Drizzle ORM ins
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/db generate  # Generate Drizzle migration files
-pnpm --filter @loveable/db migrate   # Apply migrations to data/db.sqlite
+pnpm --filter @codecraft/db generate  # Generate Drizzle migration files
+pnpm --filter @codecraft/db migrate   # Apply migrations to data/db.sqlite
 ```
 
 ---

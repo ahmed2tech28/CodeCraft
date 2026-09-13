@@ -21,7 +21,7 @@ Implement local Git version control for every generated application inside `data
 
 ## 4. Commands to Run
 ```bash
-pnpm --filter @loveable/server test
+pnpm --filter server test
 ```
 
 ---

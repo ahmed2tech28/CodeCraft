@@ -24,8 +24,8 @@ Design and implement the Docker container sandbox management engine in `packages
 
 ## 4. Commands to Run
 ```bash
-docker build -t loveable-runner:latest -f docker/runner/Dockerfile .
-pnpm --filter @loveable/sandbox test
+docker build -t codecraft-runner:latest -f docker/runner/Dockerfile .
+pnpm --filter @codecraft/sandbox test
 ```
 
 ---
