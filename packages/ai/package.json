@@ -1,0 +1,23 @@
+{
+  "name": "@codecraft/ai",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/anthropic": "^1.1.9",
+    "@ai-sdk/openai": "^1.1.13",
+    "@codecraft/shared": "workspace:*",
+    "@openrouter/ai-sdk-provider": "^0.0.5",
+    "ai": "^4.1.45",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

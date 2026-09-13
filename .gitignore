@@ -36,3 +36,9 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# CodeCraft Runtime Data
+data/db.sqlite*
+data/projects/*
+!data/projects/.gitkeep
+!data/.gitkeep
