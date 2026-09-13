@@ -1,15 +1,15 @@
 # CodeCraft All-in-One Production Dockerfile
-FROM node:20-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /app
 
-# Install system tools
+# Install system compilation tools for native modules (better-sqlite3)
 RUN apt-get update && apt-get install -y git python3 make g++ && rm -rf /var/lib/apt/lists/*
 
-# Install PNPM
-RUN corepack enable && corepack prepare pnpm@11.25.0 --activate
+# Install PNPM matching user local version
+RUN corepack enable && corepack prepare pnpm@10.34.5 --activate
 
-# Copy workspace manifests
+# Copy workspace manifests for optimal layer caching
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json turbo.json ./
 COPY packages/shared/package.json ./packages/shared/
 COPY packages/db/package.json ./packages/db/
@@ -32,12 +32,12 @@ COPY . .
 RUN pnpm build
 
 # Production Runner Stage
-FROM node:20-slim AS runner
+FROM node:24-slim AS runner
 
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
-RUN corepack enable && corepack prepare pnpm@11.25.0 --activate
+RUN corepack enable && corepack prepare pnpm@10.34.5 --activate
 
 ENV NODE_ENV=production
 ENV PORT=3001
