@@ -10,6 +10,7 @@
     "./*": "./src/*.ts"
   },
   "scripts": {
+    "test": "tsx src/__tests__/agent.test.ts",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -18,11 +19,14 @@
     "@codecraft/sandbox": "workspace:*",
     "@codecraft/shared": "workspace:*",
     "ai": "^4.1.45",
+    "fs-extra": "^11.3.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.14.0",
+    "tsx": "^4.19.3",
     "typescript": "^5.5.0"
   }
 }

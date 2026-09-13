@@ -111,6 +111,18 @@ export interface AgentToolCall {
   createdAt: string;
 }
 
+export interface AgentStepEvent {
+  type: 'connected' | 'status' | 'thinking' | 'tool_call' | 'tool_result' | 'file_change' | 'complete' | 'error';
+  status?: AgentRunStatus;
+  text?: string;
+  toolName?: string;
+  toolInput?: Record<string, unknown>;
+  toolOutput?: Record<string, unknown> | string;
+  filePath?: string;
+  error?: string;
+  timestamp: string;
+}
+
 // AI Provider Types
 export type AIProviderName = 'openai' | 'anthropic' | 'openrouter' | 'ollama';
 

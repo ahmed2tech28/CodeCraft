@@ -40,7 +40,7 @@ export class ContainerManager {
       }
     }
 
-    const container = await this.docker.createContainer({
+    const container = (await this.docker.createContainer({
       Image: imageName,
       name: containerName,
       WorkingDir: '/app',
@@ -53,12 +53,12 @@ export class ContainerManager {
       HostConfig: {
         Binds: [`${options.workspaceHostPath}:/app`],
         Memory: memoryBytes,
-        NanoCPUs: nanoCpus,
+        NanoCpus: nanoCpus,
         PidsLimit: pidsLimit,
         AutoRemove: false,
         NetworkMode: options.networkName || 'bridge',
       },
-    });
+    })) as Docker.Container;
 
     await container.start();
 

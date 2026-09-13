@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  codecraft:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: codecraft-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000" # Web UI (Next.js)
+      - "3001:3001" # API & SSE Server (Fastify)
+    volumes:
+      # Docker socket to spawn isolated runner and preview containers
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Persistent SQLite DB and project workspaces
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - WEB_PORT=3000
+      - HOST=0.0.0.0
+      - DATABASE_URL=/app/data/db.sqlite
+      - JWT_SECRET=${JWT_SECRET:-codecraft-super-secret-production-key-change-me}
+      - AI_PROVIDER=${AI_PROVIDER:-openai}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3001/api/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
