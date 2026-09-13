@@ -22,10 +22,11 @@ services:
       - HOST=0.0.0.0
       - DATABASE_URL=/app/data/db.sqlite
       - JWT_SECRET=${JWT_SECRET:-codecraft-super-secret-production-key-change-me}
-      - AI_PROVIDER=${AI_PROVIDER:-openai}
+      - AI_PROVIDER=${AI_PROVIDER:-openrouter}
+      - AI_MODEL=${AI_MODEL:-google/gemma-4-31b-it:free}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
     extra_hosts:
       - "host.docker.internal:host-gateway"

@@ -1,5 +1,5 @@
-export const DEFAULT_AI_PROVIDER = 'openai';
-export const DEFAULT_AI_MODEL = 'gpt-4o-mini';
+export const DEFAULT_AI_PROVIDER = 'openrouter';
+export const DEFAULT_AI_MODEL = 'google/gemma-4-31b-it:free';
 
 export interface ModelOption {
   id: string;
@@ -10,20 +10,6 @@ export interface ModelOption {
 }
 
 export const OPENROUTER_FREE_MODELS: ModelOption[] = [
-  {
-    id: 'nex-agi/nex-n2.5-pro:free',
-    name: 'Nex AGI: Nex-N2.5-Pro (Free)',
-    isFree: true,
-    contextLength: 262144,
-    description: 'Agentic model designed for multi-file coding and visual feedback loop verification',
-  },
-  {
-    id: 'cohere/north-mini-code:free',
-    name: 'Cohere: North Mini Code (Free)',
-    isFree: true,
-    contextLength: 256000,
-    description: 'Cohere agentic coding model optimized for tool use and software development',
-  },
   {
     id: 'google/gemma-4-31b-it:free',
     name: 'Google: Gemma 4 31B Instruct (Free)',
@@ -37,6 +23,20 @@ export const OPENROUTER_FREE_MODELS: ModelOption[] = [
     isFree: true,
     contextLength: 262144,
     description: 'Google DeepMind efficient Mixture-of-Experts model with 256k context',
+  },
+  {
+    id: 'nex-agi/nex-n2.5-pro:free',
+    name: 'Nex AGI: Nex-N2.5-Pro (Free)',
+    isFree: true,
+    contextLength: 262144,
+    description: 'Agentic model designed for multi-file coding and visual feedback loop verification',
+  },
+  {
+    id: 'cohere/north-mini-code:free',
+    name: 'Cohere: North Mini Code (Free)',
+    isFree: true,
+    contextLength: 256000,
+    description: 'Cohere agentic coding model optimized for tool use and software development',
   },
   {
     id: 'poolside/laguna-s-2.1:free',
@@ -93,16 +93,6 @@ export const SUPPORTED_MODELS: Record<
   string,
   { label: string; defaultModel: string; models: string[]; modelOptions?: ModelOption[] }
 > = {
-  openai: {
-    label: 'OpenAI',
-    defaultModel: 'gpt-4o-mini',
-    models: ['gpt-4o-mini', 'gpt-4o', 'o1-mini', 'o3-mini'],
-  },
-  anthropic: {
-    label: 'Anthropic',
-    defaultModel: 'claude-3-5-sonnet-latest',
-    models: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-opus-latest'],
-  },
   openrouter: {
     label: 'OpenRouter',
     defaultModel: 'google/gemma-4-31b-it:free',
@@ -110,9 +100,9 @@ export const SUPPORTED_MODELS: Record<
       // Free Models
       'google/gemma-4-31b-it:free',
       'google/gemma-4-26b-a4b-it:free',
-      'cohere/north-mini-code:free',
       'nex-agi/nex-n2.5-pro:free',
       'nex-agi/nex-n2.5-mini:free',
+      'cohere/north-mini-code:free',
       'poolside/laguna-s-2.1:free',
       'poolside/laguna-xs-2.1:free',
       'thinkingmachines/inkling:free',
@@ -134,6 +124,16 @@ export const SUPPORTED_MODELS: Record<
       { id: 'deepseek/deepseek-chat', name: 'DeepSeek: Chat V3' },
       { id: 'deepseek/deepseek-r1', name: 'DeepSeek: R1 Reasoning' },
     ],
+  },
+  openai: {
+    label: 'OpenAI',
+    defaultModel: 'gpt-4o-mini',
+    models: ['gpt-4o-mini', 'gpt-4o', 'o1-mini', 'o3-mini'],
+  },
+  anthropic: {
+    label: 'Anthropic',
+    defaultModel: 'claude-3-5-sonnet-latest',
+    models: ['claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-opus-latest'],
   },
   ollama: {
     label: 'Local Ollama',

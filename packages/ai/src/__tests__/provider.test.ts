@@ -3,16 +3,17 @@ import {
   getLanguageModel,
   testProviderConnection,
 } from '../index.js';
+import { DEFAULT_AI_PROVIDER, DEFAULT_AI_MODEL } from '@codecraft/shared';
 
 async function runAiTests() {
   console.log('🧪 Starting AI Provider Layer Tests...');
 
   // 1. Test Config Validator with defaults
   const defaultConfig = resolveAndValidateConfig();
-  if (defaultConfig.provider !== 'openai' || defaultConfig.model !== 'gpt-4o-mini') {
-    throw new Error('Default config resolution failed');
+  if (defaultConfig.provider !== DEFAULT_AI_PROVIDER || defaultConfig.model !== DEFAULT_AI_MODEL) {
+    throw new Error(`Default config resolution failed: got ${defaultConfig.provider}/${defaultConfig.model}`);
   }
-  console.log('  ✓ Default configuration resolved correctly (openai / gpt-4o-mini)');
+  console.log(`  ✓ Default configuration resolved correctly (${DEFAULT_AI_PROVIDER} / ${DEFAULT_AI_MODEL})`);
 
   // 2. Test Custom Config Overrides
   const anthropicConfig = resolveAndValidateConfig({

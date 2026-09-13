@@ -3,7 +3,7 @@ import { DEFAULT_AI_PROVIDER, DEFAULT_AI_MODEL } from '@codecraft/shared';
 import { ResolvedModelConfig } from './types.js';
 
 const aiConfigSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama']).default('openai'),
+  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama']).default(DEFAULT_AI_PROVIDER as 'openrouter'),
   model: z.string().min(1).default(DEFAULT_AI_MODEL),
   apiKey: z.string().optional(),
   baseUrl: z.string().optional(),
