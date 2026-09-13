@@ -1,0 +1,1 @@
+docker build -t codecraft-runner:latest -f docker/runner/Dockerfile .

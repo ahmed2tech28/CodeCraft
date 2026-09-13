@@ -32,7 +32,7 @@ async function runSandboxTests() {
         img.RepoTags?.some((tag) => tag.includes('alpine') || tag.includes('codecraft-runner'))
       );
 
-      const testImage = hasAlpine ? 'alpine:latest' : 'alpine:latest';
+      const testImage = 'codecraft-runner:latest';
 
       const container = await client.createContainer({
         Image: testImage,
