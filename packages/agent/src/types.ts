@@ -18,6 +18,8 @@ export interface RunAgentOptions {
   maxSteps?: number;
   providerOverride?: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
   modelOverride?: string;
+  apiKeyOverride?: string;
+  baseUrlOverride?: string;
   onEvent?: (event: AgentStepEvent) => void;
 }
 

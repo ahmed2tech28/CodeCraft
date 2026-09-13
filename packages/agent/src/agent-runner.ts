@@ -1,6 +1,6 @@
 import { generateText } from 'ai';
 import { getLanguageModel } from '@codecraft/ai';
-import { agentRepository } from '@codecraft/db';
+import { agentRepository, providerRepository } from '@codecraft/db';
 import { sanitizeSecrets, sanitizeObject } from '@codecraft/shared';
 import { CODECRAFT_SYSTEM_PROMPT } from './system-prompt.js';
 import { createAgentTools } from './tools/index.js';
@@ -43,10 +43,23 @@ export class AgentRunner {
       timestamp: new Date().toISOString(),
     });
 
-    // 3. Resolve AI Language Model
+    // 3. Resolve AI Language Model from DB Config or Environment
+    const activeDbConfig = await providerRepository.getActiveConfig();
+
+    const resolvedProvider =
+      options.providerOverride ||
+      (activeDbConfig?.provider as 'openai' | 'anthropic' | 'openrouter' | 'ollama') ||
+      undefined;
+
+    const resolvedModel = options.modelOverride || activeDbConfig?.model || undefined;
+    const resolvedApiKey = options.apiKeyOverride || activeDbConfig?.apiKeyEncrypted || undefined;
+    const resolvedBaseUrl = options.baseUrlOverride || activeDbConfig?.baseUrl || undefined;
+
     const { model, config: activeConfig } = getLanguageModel({
-      provider: options.providerOverride,
-      model: options.modelOverride,
+      provider: resolvedProvider,
+      model: resolvedModel,
+      apiKey: resolvedApiKey,
+      baseUrl: resolvedBaseUrl,
     });
 
     emitEvent({

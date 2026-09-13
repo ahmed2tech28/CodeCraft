@@ -32,4 +32,17 @@ export async function systemRoutes(server: FastifyInstance) {
     const config = await providerRepository.getActiveConfig();
     return { config };
   });
+
+  // Save / Update AI provider config
+  server.post('/api/system/provider-config', async (req) => {
+    const body = req.body as {
+      provider: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+      model: string;
+      apiKey?: string;
+      baseUrl?: string;
+    };
+
+    const config = await providerRepository.saveConfig(body);
+    return { success: true, config };
+  });
 }
