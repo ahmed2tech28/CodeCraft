@@ -12,7 +12,7 @@ export async function authRoutes(server: FastifyInstance) {
     return {
       hasSuperuser,
       isInitialized,
-      defaultProviderConfigured: !!activeProvider || !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY,
+      defaultProviderConfigured: !!activeProvider || !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY || !!process.env.GEMINI_API_KEY || !!process.env.OPENROUTER_API_KEY,
     };
   });
 

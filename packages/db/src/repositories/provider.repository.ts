@@ -20,7 +20,7 @@ export const providerRepository = {
   },
 
   async saveConfig(input: {
-    provider: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+    provider: 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
     model: string;
     apiKey?: string;
     baseUrl?: string;

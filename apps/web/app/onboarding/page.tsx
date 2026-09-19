@@ -17,7 +17,7 @@ export default function OnboardingPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic' | 'openrouter' | 'ollama'>('openrouter');
+  const [aiProvider, setAiProvider] = useState<'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini'>('openrouter');
   const [aiModel, setAiModel] = useState('google/gemma-4-31b-it:free');
   const [apiKey, setApiKey] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
@@ -198,14 +198,15 @@ export default function OnboardingPage() {
                   <select
                     value={aiProvider}
                     onChange={(e) => {
-                      const p = e.target.value as 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+                      const p = e.target.value as 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
                       setAiProvider(p);
                       const def = SUPPORTED_MODELS[p]?.defaultModel || 'gpt-4o-mini';
                       setAiModel(def);
                     }}
                     className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
                   >
-                    <option value="openrouter">OpenRouter (Free Models & All Frontier Models)</option>
+                    <option value="openrouter">OpenRouter (Free Models &amp; All Frontier Models)</option>
+                    <option value="gemini">Google Gemini (Gemini 2.5 Pro / Flash — Direct API)</option>
                     <option value="openai">OpenAI (GPT-4o, GPT-4o Mini)</option>
                     <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
                     <option value="ollama">Local Ollama (Offline / Private)</option>
@@ -221,9 +222,15 @@ export default function OnboardingPage() {
                         <span>Free Models Available</span>
                       </span>
                     )}
+                    {aiProvider === 'gemini' && (
+                      <span className="text-[10px] text-blue-400 font-medium flex items-center gap-1">
+                        <Zap className="w-3 h-3" />
+                        <span>Google AI — Free Quota Available</span>
+                      </span>
+                    )}
                   </div>
 
-                  {currentProviderConfig?.modelOptions ? (
+                  {currentProviderConfig?.modelOptions && aiProvider === 'openrouter' ? (
                     <select
                       value={aiModel}
                       onChange={(e) => setAiModel(e.target.value)}
@@ -266,18 +273,33 @@ export default function OnboardingPage() {
                 {aiProvider !== 'ollama' && (
                   <div>
                     <label className="block text-xs font-medium text-zinc-300 mb-1.5">
-                      {aiProvider === 'openrouter' ? 'OpenRouter API Key (Get from openrouter.ai/keys)' : 'API Key'}
+                      {aiProvider === 'openrouter'
+                        ? 'OpenRouter API Key (Get from openrouter.ai/keys)'
+                        : aiProvider === 'gemini'
+                          ? 'Gemini API Key (Get free from aistudio.google.com/app/apikey)'
+                          : 'API Key'}
                     </label>
                     <input
                       type="password"
                       value={apiKey}
                       onChange={(e) => setApiKey(e.target.value)}
-                      placeholder={aiProvider === 'openrouter' ? 'sk-or-v1-...' : 'sk-...'}
+                      placeholder={
+                        aiProvider === 'openrouter'
+                          ? 'sk-or-v1-...'
+                          : aiProvider === 'gemini'
+                            ? 'AIza...'
+                            : 'sk-...'
+                      }
                       className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100 placeholder:text-zinc-600"
                     />
                     {aiProvider === 'openrouter' && (
                       <p className="text-[11px] text-zinc-500 mt-1">
                         Free models on OpenRouter require a free OpenRouter account key ($0 balance is fine).
+                      </p>
+                    )}
+                    {aiProvider === 'gemini' && (
+                      <p className="text-[11px] text-zinc-500 mt-1">
+                        Google AI Studio offers free quota for Gemini models. Get your key at aistudio.google.com.
                       </p>
                     )}
                   </div>

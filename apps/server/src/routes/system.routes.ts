@@ -17,7 +17,7 @@ export async function systemRoutes(server: FastifyInstance) {
   // Test AI Connection
   server.post('/api/system/test-ai', async (req) => {
     const body = req.body as {
-      provider?: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+      provider?: 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
       model?: string;
       apiKey?: string;
       baseUrl?: string;
@@ -36,7 +36,7 @@ export async function systemRoutes(server: FastifyInstance) {
   // Save / Update AI provider config
   server.post('/api/system/provider-config', async (req) => {
     const body = req.body as {
-      provider: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+      provider: 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
       model: string;
       apiKey?: string;
       baseUrl?: string;

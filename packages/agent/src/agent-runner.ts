@@ -2,6 +2,7 @@ import { generateText } from 'ai';
 import { getLanguageModel } from '@codecraft/ai';
 import { agentRepository, providerRepository } from '@codecraft/db';
 import { sanitizeSecrets, sanitizeObject } from '@codecraft/shared';
+import { containerManager } from '@codecraft/sandbox';
 import { CODECRAFT_SYSTEM_PROMPT } from './system-prompt.js';
 import { createAgentTools } from './tools/index.js';
 import {
@@ -14,6 +15,9 @@ import {
 export class AgentRunner {
   /**
    * Executes an autonomous coding agent run on a project workspace.
+   * If no containerId is supplied, a temporary sandbox runner container is
+   * provisioned automatically. All file ops go through the container, with
+   * files synced back to the host via Docker volume mount.
    */
   async run(options: RunAgentOptions): Promise<RunAgentResult> {
     const startTime = Date.now();
@@ -48,7 +52,7 @@ export class AgentRunner {
 
     const resolvedProvider =
       options.providerOverride ||
-      (activeDbConfig?.provider as 'openai' | 'anthropic' | 'openrouter' | 'ollama') ||
+      (activeDbConfig?.provider as 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini') ||
       undefined;
 
     const resolvedModel = options.modelOverride || activeDbConfig?.model || undefined;
@@ -69,11 +73,43 @@ export class AgentRunner {
       timestamp: new Date().toISOString(),
     });
 
-    // 4. Initialize Context & Tools
+    // 4. Provision a runner container if none is provided
+    // The container mounts the project workspace at /workspace so all file
+    // operations happen inside the sandbox and sync back to the host automatically.
+    let containerId = options.containerId;
+    let containerProvisioned = false;
+
+    try {
+      if (!containerId) {
+        const runnerContainer = await containerManager.createRunnerContainer({
+          projectId: options.projectId,
+          workspaceHostPath: options.workspacePath,
+          containerType: 'runner',
+        });
+        containerId = runnerContainer.id;
+        containerProvisioned = true;
+        emitEvent({
+          type: 'status',
+          status: 'coding',
+          text: `Sandbox container ready (${runnerContainer.name})`,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    } catch (sandboxErr) {
+      // Docker may not be available (dev mode) — fall through to host-only ops
+      emitEvent({
+        type: 'status',
+        status: 'coding',
+        text: `Running without sandbox container (Docker unavailable): ${(sandboxErr as Error).message}`,
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    // 5. Initialize Context & Tools
     const context: AgentContext = {
       projectId: options.projectId,
       workspacePath: options.workspacePath,
-      containerId: options.containerId,
+      containerId,
       runId,
       emitEvent: (event) => {
         if (event.type === 'file_change' && event.filePath) {
@@ -185,6 +221,11 @@ export class AgentRunner {
         durationMs,
         error: errorMsg,
       };
+    } finally {
+      // Clean up the runner container if it was auto-provisioned for this run
+      if (containerProvisioned && containerId) {
+        await containerManager.stopAndRemoveContainer(containerId).catch(() => {});
+      }
     }
   }
 }

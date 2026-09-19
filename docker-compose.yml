@@ -8,8 +8,10 @@ services:
     ports:
       - "3000:3000" # Web UI (Next.js)
       - "3001:3001" # API & SSE Server (Fastify)
+      # Preview ports range: each project preview container maps a dynamic port
+      - "4000-4050:4000-4050"
     volumes:
-      # Docker socket to spawn isolated runner and preview containers
+      # Docker socket to spawn isolated sandbox containers per project
       - /var/run/docker.sock:/var/run/docker.sock
       # Persistent SQLite DB and project workspaces
       - ./data:/app/data
@@ -20,12 +22,34 @@ services:
       - HOST=0.0.0.0
       - DATABASE_URL=/app/data/db.sqlite
       - JWT_SECRET=${JWT_SECRET:-codecraft-super-secret-production-key-change-me}
+
+      # --- AI Provider Selection ---
+      # Options: 'openrouter' | 'openai' | 'anthropic' | 'ollama' | 'gemini'
       - AI_PROVIDER=${AI_PROVIDER:-openrouter}
       - AI_MODEL=${AI_MODEL:-google/gemma-4-31b-it:free}
+
+      # --- API Keys (set in .env file) ---
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      # Google Gemini API Key (get free at https://aistudio.google.com/app/apikey)
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GOOGLE_AI_API_KEY=${GOOGLE_AI_API_KEY:-}
+
+      # --- Local Ollama ---
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+
+      # --- Docker Sandbox Image ---
+      # Image used for per-project runner and preview containers
+      - SANDBOX_DOCKER_IMAGE=${SANDBOX_DOCKER_IMAGE:-codecraft-sandbox:latest}
+
+      # --- Preview URL Host ---
+      # When running in Docker, set this to your machine's LAN IP or domain
+      # so the browser can access preview containers from outside Docker.
+      # Example: PUBLIC_HOST=192.168.1.100 or PUBLIC_HOST=myserver.example.com
+      # Default: localhost (works for local dev without Docker networking issues)
+      - PUBLIC_HOST=${PUBLIC_HOST:-localhost}
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     healthcheck:

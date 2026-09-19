@@ -5,7 +5,7 @@ export const createSuperUserSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
-  aiProvider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama']).default('openai'),
+  aiProvider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama', 'gemini']).default('openai'),
   aiModel: z.string().min(1, 'Model name is required'),
   apiKey: z.string().optional(),
   baseUrl: z.string().url().optional(),
@@ -53,7 +53,7 @@ export type StartAgentRunInput = z.infer<typeof startAgentRunSchema>;
 
 // AI Provider Configuration Schema
 export const providerConfigSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama']),
+  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama', 'gemini']),
   model: z.string().min(1, 'Model is required'),
   apiKey: z.string().optional(),
   baseUrl: z.string().url().optional(),

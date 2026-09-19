@@ -2,7 +2,7 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const providerConfigs = sqliteTable('provider_configs', {
   id: text('id').primaryKey(),
-  provider: text('provider', { enum: ['openai', 'anthropic', 'openrouter', 'ollama'] }).notNull(),
+  provider: text('provider', { enum: ['openai', 'anthropic', 'openrouter', 'ollama', 'gemini'] }).notNull(),
   model: text('model').notNull(),
   apiKeyEncrypted: text('api_key_encrypted'),
   baseUrl: text('base_url'),

@@ -12,6 +12,15 @@ export interface ProjectPreviewStatus {
 // Active project preview map
 const activePreviews = new Map<string, { containerId: string; port: number }>();
 
+/**
+ * Resolves the public host for preview URLs.
+ * When running inside Docker, use PUBLIC_HOST env var or host.docker.internal.
+ * Default: localhost for local development.
+ */
+function getPreviewHost(): string {
+  return process.env.PUBLIC_HOST || process.env.PREVIEW_HOST || 'localhost';
+}
+
 export class PreviewManager {
   /**
    * Finds an available free TCP port on localhost.
@@ -36,6 +45,8 @@ export class PreviewManager {
 
   /**
    * Starts a persistent live preview container for a project workspace.
+   * The container mounts the project workspace at /workspace (host-to-container sync via volume).
+   * The dev server is started inside the container; changes made by the agent also go through /workspace.
    */
   async startPreview(
     projectId: string,
@@ -43,24 +54,30 @@ export class PreviewManager {
   ): Promise<ProjectPreviewStatus> {
     const existing = activePreviews.get(projectId);
     if (existing) {
+      const previewHost = getPreviewHost();
       return {
         projectId,
         containerId: existing.containerId,
         status: 'running',
         port: existing.port,
-        previewUrl: `http://localhost:${existing.port}`,
+        previewUrl: `http://${previewHost}:${existing.port}`,
       };
     }
 
     const port = await this.findFreePort();
     const docker = getDockerClient();
     const containerName = `codecraft-preview-${projectId.slice(0, 8)}-${Date.now()}`;
-    const imageName = process.env.PREVIEW_DOCKER_IMAGE || 'codecraft-runner:latest';
+    // Use unified sandbox image (supports both runner + preview modes)
+    const imageName =
+      process.env.SANDBOX_DOCKER_IMAGE ||
+      process.env.PREVIEW_DOCKER_IMAGE ||
+      'codecraft-sandbox:latest';
 
     const container = (await docker.createContainer({
       Image: imageName,
       name: containerName,
-      WorkingDir: '/app',
+      WorkingDir: '/workspace',
+      // Override CMD to run the dev server bound to 0.0.0.0 so it's reachable outside the container
       Cmd: ['pnpm', 'dev', '--host', '0.0.0.0', '--port', '3000'],
       Labels: {
         'codecraft.project.id': projectId,
@@ -70,7 +87,8 @@ export class PreviewManager {
         '3000/tcp': {},
       },
       HostConfig: {
-        Binds: [`${workspaceHostPath}:/app`],
+        // Mount project workspace so edits from agent/UI are immediately visible in preview
+        Binds: [`${workspaceHostPath}:/workspace`],
         PortBindings: {
           '3000/tcp': [{ HostPort: port.toString() }],
         },
@@ -85,12 +103,13 @@ export class PreviewManager {
       port,
     });
 
+    const previewHost = getPreviewHost();
     return {
       projectId,
       containerId: container.id,
       status: 'running',
       port,
-      previewUrl: `http://localhost:${port}`,
+      previewUrl: `http://${previewHost}:${port}`,
     };
   }
 
@@ -120,12 +139,13 @@ export class PreviewManager {
       };
     }
 
+    const previewHost = getPreviewHost();
     return {
       projectId,
       containerId: active.containerId,
       status: 'running',
       port: active.port,
-      previewUrl: `http://localhost:${active.port}`,
+      previewUrl: `http://${previewHost}:${active.port}`,
     };
   }
 }
