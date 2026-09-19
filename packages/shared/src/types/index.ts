@@ -124,7 +124,7 @@ export interface AgentStepEvent {
 }
 
 // AI Provider Types
-export type AIProviderName = 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+export type AIProviderName = 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
 
 export interface ProviderConfig {
   id: string;

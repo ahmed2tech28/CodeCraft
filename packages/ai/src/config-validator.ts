@@ -3,7 +3,7 @@ import { DEFAULT_AI_PROVIDER, DEFAULT_AI_MODEL } from '@codecraft/shared';
 import { ResolvedModelConfig } from './types.js';
 
 const aiConfigSchema = z.object({
-  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama']).default(DEFAULT_AI_PROVIDER as 'openrouter'),
+  provider: z.enum(['openai', 'anthropic', 'openrouter', 'ollama', 'gemini']).default(DEFAULT_AI_PROVIDER as 'openrouter'),
   model: z.string().min(1).default(DEFAULT_AI_MODEL),
   apiKey: z.string().optional(),
   baseUrl: z.string().optional(),
@@ -14,7 +14,7 @@ export function resolveAndValidateConfig(customConfig?: Partial<ResolvedModelCon
     customConfig?.provider ||
     process.env.AI_PROVIDER ||
     DEFAULT_AI_PROVIDER
-  ) as 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+  ) as 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
 
   let apiKey = customConfig?.apiKey;
   let baseUrl = customConfig?.baseUrl;
@@ -25,6 +25,7 @@ export function resolveAndValidateConfig(customConfig?: Partial<ResolvedModelCon
     if (provider === 'openai') apiKey = process.env.OPENAI_API_KEY;
     else if (provider === 'anthropic') apiKey = process.env.ANTHROPIC_API_KEY;
     else if (provider === 'openrouter') apiKey = process.env.OPENROUTER_API_KEY;
+    else if (provider === 'gemini') apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY;
   }
 
   // Resolve base URL for local models
@@ -41,3 +42,4 @@ export function resolveAndValidateConfig(customConfig?: Partial<ResolvedModelCon
 
   return parsed;
 }
+

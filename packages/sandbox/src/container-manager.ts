@@ -23,8 +23,9 @@ export class ContainerManager {
     const containerName = `codecraft-runner-${options.projectId.slice(0, 8)}-${timestamp}`;
     const imageName =
       options.imageName ||
+      process.env.SANDBOX_DOCKER_IMAGE ||
       process.env.RUNNER_DOCKER_IMAGE ||
-      'codecraft-runner:latest';
+      'codecraft-sandbox:latest';
 
     const memoryBytes =
       options.limits?.memoryBytes || SANDBOX_DEFAULTS.MEMORY_LIMIT;
@@ -43,7 +44,7 @@ export class ContainerManager {
     const container = (await this.docker.createContainer({
       Image: imageName,
       name: containerName,
-      WorkingDir: '/app',
+      WorkingDir: '/workspace',
       Cmd: ['sleep', 'infinity'],
       Env: envArray,
       Labels: {
@@ -51,7 +52,7 @@ export class ContainerManager {
         'codecraft.container.type': 'runner',
       },
       HostConfig: {
-        Binds: [`${options.workspaceHostPath}:/app`],
+        Binds: [`${options.workspaceHostPath}:/workspace`],
         Memory: memoryBytes,
         NanoCpus: nanoCpus,
         PidsLimit: pidsLimit,
@@ -88,7 +89,7 @@ export class ContainerManager {
       Cmd: ['bash', '-c', command],
       AttachStdout: true,
       AttachStderr: true,
-      WorkingDir: options.workingDir || '/app',
+      WorkingDir: options.workingDir || '/workspace',
       Env: options.env
         ? Object.entries(options.env).map(([k, v]) => `${k}=${v}`)
         : undefined,

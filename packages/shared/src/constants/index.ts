@@ -140,6 +140,63 @@ export const SUPPORTED_MODELS: Record<
     defaultModel: 'qwen2.5-coder:latest',
     models: ['qwen2.5-coder:latest', 'deepseek-r1:latest', 'llama3.1:latest', 'mistral:latest'],
   },
+  gemini: {
+    label: 'Google Gemini',
+    defaultModel: 'gemini-2.0-flash',
+    models: [
+      'gemini-2.5-pro',
+      'gemini-2.5-flash',
+      'gemini-2.0-flash',
+      'gemini-2.0-flash-lite',
+      'gemini-1.5-pro',
+      'gemini-1.5-flash',
+      'gemini-1.5-flash-8b',
+    ],
+    modelOptions: [
+      {
+        id: 'gemini-2.5-pro',
+        name: 'Gemini 2.5 Pro',
+        contextLength: 1048576,
+        description: 'Most capable Gemini model with 1M context — best for complex coding',
+      },
+      {
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
+        contextLength: 1048576,
+        description: 'Fast and highly capable, excellent price-to-performance for coding',
+      },
+      {
+        id: 'gemini-2.0-flash',
+        name: 'Gemini 2.0 Flash',
+        contextLength: 1048576,
+        description: 'Balanced speed and capability, great for most coding tasks',
+      },
+      {
+        id: 'gemini-2.0-flash-lite',
+        name: 'Gemini 2.0 Flash Lite',
+        contextLength: 1048576,
+        description: 'Lightweight and fast for simpler tasks',
+      },
+      {
+        id: 'gemini-1.5-pro',
+        name: 'Gemini 1.5 Pro',
+        contextLength: 2097152,
+        description: 'Up to 2M context — ideal for large codebase analysis',
+      },
+      {
+        id: 'gemini-1.5-flash',
+        name: 'Gemini 1.5 Flash',
+        contextLength: 1048576,
+        description: 'Fast and cost-effective with 1M context',
+      },
+      {
+        id: 'gemini-1.5-flash-8b',
+        name: 'Gemini 1.5 Flash 8B',
+        contextLength: 1048576,
+        description: 'Smallest and fastest Gemini 1.5 model',
+      },
+    ],
+  },
 };
 
 export const IGNORED_DIRECTORIES = [

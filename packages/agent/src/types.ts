@@ -16,7 +16,7 @@ export interface RunAgentOptions {
   workspacePath: string;
   containerId?: string;
   maxSteps?: number;
-  providerOverride?: 'openai' | 'anthropic' | 'openrouter' | 'ollama';
+  providerOverride?: 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';
   modelOverride?: string;
   apiKeyOverride?: string;
   baseUrlOverride?: string;
