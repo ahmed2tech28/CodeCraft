@@ -29,6 +29,17 @@ await server.register(cors, {
 
 await server.register(formbody);
 
+// Safely handle empty JSON bodies without throwing FST_ERR_CTP_EMPTY_JSON_BODY
+server.addContentTypeParser('application/json', { parseAs: 'string' }, (req, body, done) => {
+  try {
+    const str = body as string;
+    const json = str && str.trim() ? JSON.parse(str) : {};
+    done(null, json);
+  } catch (err) {
+    done(err as Error, undefined);
+  }
+});
+
 // Register API Route Modules
 await server.register(authRoutes);
 await server.register(projectsRoutes);

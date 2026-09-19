@@ -1,5 +1,5 @@
 # CodeCraft All-in-One Production Dockerfile
-FROM node:24-slim AS builder
+FROM node:20-slim AS builder
 
 WORKDIR /app
 
@@ -32,7 +32,7 @@ COPY . .
 RUN pnpm build
 
 # Production Runner Stage
-FROM node:24-slim AS runner
+FROM node:20-slim AS runner
 
 WORKDIR /app
 
