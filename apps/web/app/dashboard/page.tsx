@@ -8,13 +8,17 @@ import {
   Search,
   ExternalLink,
   Trash2,
-  Play,
   FolderCode,
   Calendar,
-  Layers,
+  Settings,
+  CheckCircle2,
+  AlertCircle,
+  Zap,
+  Gift,
 } from 'lucide-react';
 import { apiFetch } from '../../lib/api';
-import { Project } from '@codecraft/shared';
+import { Project, ProviderConfig } from '@codecraft/shared';
+import { SUPPORTED_MODELS } from '@codecraft/shared';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -25,6 +29,17 @@ export default function DashboardPage() {
   const [newProjectName, setNewProjectName] = useState('');
   const [newProjectTemplate, setNewProjectTemplate] = useState<'nextjs' | 'blank'>('nextjs');
   const [creating, setCreating] = useState(false);
+
+  // Settings modal state
+  const [showSettings, setShowSettings] = useState(false);
+  const [settingsProvider, setSettingsProvider] = useState<'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini'>('openrouter');
+  const [settingsModel, setSettingsModel] = useState('google/gemma-4-31b-it:free');
+  const [settingsApiKey, setSettingsApiKey] = useState('');
+  const [settingsBaseUrl, setSettingsBaseUrl] = useState('');
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsTestStatus, setSettingsTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [settingsTestMsg, setSettingsTestMsg] = useState<string | null>(null);
+  const [currentConfig, setCurrentConfig] = useState<ProviderConfig | null>(null);
 
   const loadProjects = async () => {
     try {
@@ -37,8 +52,22 @@ export default function DashboardPage() {
     }
   };
 
+  const loadCurrentConfig = async () => {
+    try {
+      const res = await apiFetch<{ config: ProviderConfig | null }>('/api/system/provider-config');
+      if (res.config) {
+        setCurrentConfig(res.config);
+        setSettingsProvider(res.config.provider);
+        setSettingsModel(res.config.model);
+      }
+    } catch {
+      // Ignore
+    }
+  };
+
   useEffect(() => {
     loadProjects();
+    loadCurrentConfig();
   }, []);
 
   const handleCreateProject = async (e: React.FormEvent) => {
@@ -76,9 +105,73 @@ export default function DashboardPage() {
     }
   };
 
+  const handleTestConnection = async () => {
+    setSettingsTestStatus('testing');
+    setSettingsTestMsg(null);
+    try {
+      const res = await apiFetch<{ success: boolean; message?: string; error?: string }>('/api/system/test-ai', {
+        method: 'POST',
+        body: JSON.stringify({
+          provider: settingsProvider,
+          model: settingsModel,
+          apiKey: settingsApiKey || undefined,
+          baseUrl: settingsBaseUrl || undefined,
+        }),
+      });
+      if (res.success) {
+        setSettingsTestStatus('success');
+        setSettingsTestMsg(res.message || 'Connection verified!');
+      } else {
+        setSettingsTestStatus('error');
+        setSettingsTestMsg(res.error || 'Connection failed');
+      }
+    } catch (err: unknown) {
+      setSettingsTestStatus('error');
+      setSettingsTestMsg((err as Error).message);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    setSettingsSaving(true);
+    try {
+      await apiFetch('/api/system/provider-config', {
+        method: 'POST',
+        body: JSON.stringify({
+          provider: settingsProvider,
+          model: settingsModel,
+          apiKey: settingsApiKey || undefined,
+          baseUrl: settingsBaseUrl || undefined,
+        }),
+      });
+      await loadCurrentConfig();
+      setShowSettings(false);
+      setSettingsApiKey('');
+      setSettingsTestStatus('idle');
+      setSettingsTestMsg(null);
+    } catch (err: unknown) {
+      alert((err as Error).message);
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
   const filteredProjects = projects.filter((p) =>
     p.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const currentProviderConfig = SUPPORTED_MODELS[settingsProvider];
+
+  const getApiKeyLabel = () => {
+    if (settingsProvider === 'openrouter') return 'OpenRouter API Key (openrouter.ai/keys)';
+    if (settingsProvider === 'gemini') return 'Gemini API Key (aistudio.google.com/app/apikey)';
+    return 'API Key';
+  };
+
+  const getApiKeyPlaceholder = () => {
+    if (settingsProvider === 'openrouter') return 'sk-or-v1-...';
+    if (settingsProvider === 'gemini') return 'AIza...';
+    return 'sk-...';
+  };
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
@@ -92,13 +185,35 @@ export default function DashboardPage() {
             <span className="font-bold text-lg text-zinc-100">CodeCraft</span>
           </div>
 
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 font-medium text-xs text-white shadow-lg shadow-purple-600/20 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>New Project</span>
-          </button>
+          <div className="flex items-center gap-3">
+            {/* AI Provider Badge */}
+            {currentConfig && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-xs text-zinc-400 hover:text-zinc-200 transition-all"
+              >
+                <Zap className="w-3.5 h-3.5 text-purple-400" />
+                <span className="font-mono">{currentConfig.provider}/{currentConfig.model.split('/').pop()}</span>
+              </button>
+            )}
+
+            {/* Settings button */}
+            <button
+              onClick={() => setShowSettings(true)}
+              className="p-2 rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 transition-all"
+              title="AI Provider Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 font-medium text-xs text-white shadow-lg shadow-purple-600/20 transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              <span>New Project</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -238,6 +353,167 @@ export default function DashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* AI Provider Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass-panel w-full max-w-lg rounded-2xl p-6 shadow-2xl border border-zinc-800">
+            <div className="flex items-center justify-between mb-1">
+              <h2 className="text-lg font-bold text-zinc-100">AI Provider Settings</h2>
+              <button
+                onClick={() => { setShowSettings(false); setSettingsTestStatus('idle'); setSettingsTestMsg(null); setSettingsApiKey(''); }}
+                className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-zinc-400 mb-6">Update your AI provider or API key at any time.</p>
+
+            <div className="space-y-4">
+              {/* Provider */}
+              <div>
+                <label className="block text-xs font-medium text-zinc-300 mb-1.5">Provider</label>
+                <select
+                  value={settingsProvider}
+                  onChange={(e) => {
+                    const p = e.target.value as typeof settingsProvider;
+                    setSettingsProvider(p);
+                    setSettingsModel(SUPPORTED_MODELS[p]?.defaultModel || '');
+                    setSettingsTestStatus('idle');
+                    setSettingsTestMsg(null);
+                  }}
+                  className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
+                >
+                  <option value="openrouter">OpenRouter (Free Models &amp; All Frontier Models)</option>
+                  <option value="gemini">Google Gemini (gemini-2.5-pro, gemini-2.0-flash…)</option>
+                  <option value="openai">OpenAI (GPT-4o, GPT-4o Mini)</option>
+                  <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
+                  <option value="ollama">Local Ollama (Offline / Private)</option>
+                </select>
+              </div>
+
+              {/* Model */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-zinc-300">Model</label>
+                  {settingsProvider === 'openrouter' && (
+                    <span className="text-[10px] text-emerald-400 flex items-center gap-1">
+                      <Gift className="w-3 h-3" /> Free models available
+                    </span>
+                  )}
+                  {settingsProvider === 'gemini' && (
+                    <span className="text-[10px] text-blue-400 flex items-center gap-1">
+                      <Zap className="w-3 h-3" /> Free quota available
+                    </span>
+                  )}
+                </div>
+                <select
+                  value={settingsModel}
+                  onChange={(e) => setSettingsModel(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
+                >
+                  {currentProviderConfig?.modelOptions
+                    ? currentProviderConfig.modelOptions.map((m) => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))
+                    : currentProviderConfig?.models.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                </select>
+              </div>
+
+              {/* API Key */}
+              {settingsProvider !== 'ollama' && (
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">
+                    {getApiKeyLabel()}
+                  </label>
+                  <input
+                    type="password"
+                    value={settingsApiKey}
+                    onChange={(e) => setSettingsApiKey(e.target.value)}
+                    placeholder={
+                      currentConfig?.provider === settingsProvider
+                        ? '••••••••• (leave blank to keep existing key)'
+                        : getApiKeyPlaceholder()
+                    }
+                    className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100 placeholder:text-zinc-600"
+                  />
+                  {settingsProvider === 'gemini' && (
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      Get a free key at{' '}
+                      <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">
+                        aistudio.google.com
+                      </a>
+                    </p>
+                  )}
+                  {settingsProvider === 'openrouter' && (
+                    <p className="text-[11px] text-zinc-500 mt-1">
+                      Free models require a free account key from{' '}
+                      <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">
+                        openrouter.ai/keys
+                      </a>
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Ollama base URL */}
+              {settingsProvider === 'ollama' && (
+                <div>
+                  <label className="block text-xs font-medium text-zinc-300 mb-1.5">Ollama Base URL</label>
+                  <input
+                    type="text"
+                    value={settingsBaseUrl}
+                    onChange={(e) => setSettingsBaseUrl(e.target.value)}
+                    placeholder="http://localhost:11434/v1"
+                    className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100 placeholder:text-zinc-600"
+                  />
+                </div>
+              )}
+
+              {/* Test connection */}
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={handleTestConnection}
+                  disabled={settingsTestStatus === 'testing'}
+                  className="text-xs font-medium text-zinc-400 hover:text-zinc-200 underline disabled:opacity-50"
+                >
+                  {settingsTestStatus === 'testing' ? 'Testing...' : 'Test Connection'}
+                </button>
+                {settingsTestStatus === 'success' && (
+                  <span className="text-xs text-emerald-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> {settingsTestMsg}
+                  </span>
+                )}
+                {settingsTestStatus === 'error' && (
+                  <span className="text-xs text-rose-400 flex items-center gap-1 max-w-[60%] truncate">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {settingsTestMsg}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-6 pt-4 border-t border-zinc-800">
+              <button
+                type="button"
+                onClick={() => { setShowSettings(false); setSettingsTestStatus('idle'); setSettingsTestMsg(null); setSettingsApiKey(''); }}
+                className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSettings}
+                disabled={settingsSaving}
+                className="px-5 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-xs font-medium text-white shadow-lg shadow-purple-600/20 disabled:opacity-50"
+              >
+                {settingsSaving ? 'Saving...' : 'Save Settings'}
+              </button>
+            </div>
           </div>
         </div>
       )}
