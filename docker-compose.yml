@@ -22,6 +22,8 @@ services:
       - HOST=0.0.0.0
       - DATABASE_URL=/app/data/db.sqlite
       - JWT_SECRET=${JWT_SECRET:-codecraft-super-secret-production-key-change-me}
+      - HOST_PROJECTS_ROOT=${HOST_PROJECTS_ROOT:-$PWD/data/projects}
+      - HOST_DATA_DIR=${HOST_DATA_DIR:-$PWD/data}
 
       # --- AI Provider Selection ---
       # Options: 'openrouter' | 'openai' | 'anthropic' | 'ollama' | 'gemini'

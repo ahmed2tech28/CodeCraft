@@ -5,6 +5,7 @@ export type { AgentStepEvent };
 export interface AgentContext {
   projectId: string;
   workspacePath: string;
+  workspaceHostPath?: string;
   containerId?: string;
   runId: string;
   emitEvent: (event: AgentStepEvent) => void;
@@ -14,6 +15,7 @@ export interface RunAgentOptions {
   projectId: string;
   prompt: string;
   workspacePath: string;
+  workspaceHostPath?: string;
   containerId?: string;
   maxSteps?: number;
   providerOverride?: 'openai' | 'anthropic' | 'openrouter' | 'ollama' | 'gemini';

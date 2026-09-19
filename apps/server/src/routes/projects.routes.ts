@@ -84,8 +84,8 @@ export async function projectsRoutes(server: FastifyInstance) {
   // Start preview container for project
   server.post('/api/projects/:id/preview/start', async (req) => {
     const { id } = req.params as { id: string };
-    const workspacePath = workspaceService.getWorkspacePath(id);
-    const previewStatus = await previewManager.startPreview(id, workspacePath);
+    const workspaceHostPath = workspaceService.getWorkspaceHostPath(id);
+    const previewStatus = await previewManager.startPreview(id, workspaceHostPath);
     await projectRepository.updateProjectStatus(id, 'running', previewStatus.previewUrl);
     return { preview: previewStatus };
   });

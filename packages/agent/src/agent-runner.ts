@@ -83,7 +83,7 @@ export class AgentRunner {
       if (!containerId) {
         const runnerContainer = await containerManager.createRunnerContainer({
           projectId: options.projectId,
-          workspaceHostPath: options.workspacePath,
+          workspaceHostPath: options.workspaceHostPath || options.workspacePath,
           containerType: 'runner',
         });
         containerId = runnerContainer.id;

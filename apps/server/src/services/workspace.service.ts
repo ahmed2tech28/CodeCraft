@@ -33,6 +33,23 @@ export class WorkspaceService {
   }
 
   /**
+   * Resolves the host machine filesystem path for Docker volume binds.
+   * When running inside Docker, this returns the host path (e.g. /Users/.../data/projects/<id>)
+   * so the host Docker daemon can mount it into sandbox containers.
+   */
+  getWorkspaceHostPath(projectId: string): string {
+    const hostProjectsRoot = process.env.HOST_PROJECTS_ROOT;
+    if (hostProjectsRoot) {
+      return path.resolve(hostProjectsRoot, projectId);
+    }
+    const hostDataDir = process.env.HOST_DATA_DIR;
+    if (hostDataDir) {
+      return path.resolve(hostDataDir, 'projects', projectId);
+    }
+    return this.getWorkspacePath(projectId);
+  }
+
+  /**
    * Resolves a file path strictly within the project workspace to prevent directory traversal attacks.
    */
   resolveSafePath(projectId: string, relativePath: string): string {
