@@ -22,6 +22,9 @@ import {
   Eye,
   History,
   Files,
+  ExternalLink,
+  Copy,
+  Check,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { apiFetch } from '../../../lib/api';
@@ -51,6 +54,7 @@ export default function ProjectWorkspacePage() {
   const [previewStarting, setPreviewStarting] = useState(false);
   const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [previewKey, setPreviewKey] = useState(0);
+  const [copiedUrl, setCopiedUrl] = useState(false);
 
   // Checkpoints & Diff state
   const [checkpoints, setCheckpoints] = useState<Checkpoint[]>([]);
@@ -541,7 +545,7 @@ export default function ProjectWorkspacePage() {
             <div className="flex-1 flex flex-col items-center justify-center p-4 bg-zinc-950/50">
               {previewUrl ? (
                 <div
-                  className={`h-full bg-white rounded-xl shadow-2xl border border-zinc-800 overflow-hidden transition-all duration-300 ${
+                  className={`h-full flex flex-col bg-zinc-900 rounded-xl shadow-2xl border border-zinc-800 overflow-hidden transition-all duration-300 ${
                     viewport === 'desktop'
                       ? 'w-full'
                       : viewport === 'tablet'
@@ -549,12 +553,62 @@ export default function ProjectWorkspacePage() {
                         : 'w-[375px]'
                   }`}
                 >
-                  <iframe
-                    key={previewKey}
-                    src={previewUrl}
-                    title="CodeCraft Preview"
-                    className="w-full h-full border-none"
-                  />
+                  {/* Browser Address Bar Header */}
+                  <div className="h-10 px-3 bg-zinc-900/95 border-b border-zinc-800 flex items-center justify-between gap-3 shrink-0 select-none">
+                    {/* Traffic light dots */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+                    </div>
+
+                    {/* URL Bar */}
+                    <div className="flex-1 max-w-md mx-auto flex items-center bg-zinc-950 px-3 py-1 rounded-md border border-zinc-800 text-xs text-zinc-300 font-mono">
+                      <span className="text-emerald-400 mr-2 text-[10px] font-semibold tracking-wider uppercase shrink-0">LIVE</span>
+                      <span className="truncate flex-1 text-zinc-300">{previewUrl}</span>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText(previewUrl);
+                          setCopiedUrl(true);
+                          setTimeout(() => setCopiedUrl(false), 2000);
+                        }}
+                        className="ml-2 p-1 text-zinc-500 hover:text-zinc-200 transition-colors"
+                        title="Copy URL"
+                      >
+                        {copiedUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={() => setPreviewKey((k) => k + 1)}
+                        className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+                        title="Reload Preview"
+                      >
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+                      <a
+                        href={previewUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="p-1.5 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors"
+                        title="Open in New Tab"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Preview iframe */}
+                  <div className="flex-1 bg-white relative">
+                    <iframe
+                      key={previewKey}
+                      src={previewUrl}
+                      title="CodeCraft Preview"
+                      className="w-full h-full border-none"
+                    />
+                  </div>
                 </div>
               ) : (
                 <div className="text-center p-8 max-w-sm glass-panel rounded-2xl">

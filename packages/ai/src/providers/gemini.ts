@@ -18,5 +18,7 @@ export function createGeminiModel(config: ResolvedModelConfig): LanguageModelV1 
     baseURL: config.baseUrl,
   });
 
-  return google(config.model);
+  return google(config.model, {
+    structuredOutputs: false,
+  });
 }
