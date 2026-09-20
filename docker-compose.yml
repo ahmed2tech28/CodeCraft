@@ -8,8 +8,6 @@ services:
     ports:
       - "3000:3000" # Web UI (Next.js)
       - "3001:3001" # API & SSE Server (Fastify)
-      # Preview ports range: each project preview container maps a dynamic port
-      - "4000-4050:4000-4050"
     volumes:
       # Docker socket to spawn isolated sandbox containers per project
       - /var/run/docker.sock:/var/run/docker.sock

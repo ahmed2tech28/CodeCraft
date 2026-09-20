@@ -26,17 +26,23 @@ export class PreviewManager {
    * Finds an available free TCP port on localhost.
    */
   async findFreePort(startPort = 4000): Promise<number> {
+    const usedPorts = new Set(Array.from(activePreviews.values()).map((p) => p.port));
+    let testPort = startPort;
+    while (usedPorts.has(testPort)) {
+      testPort++;
+    }
+
     return new Promise((resolve, reject) => {
       const server = net.createServer();
       server.unref();
       server.on('error', (err: NodeJS.ErrnoException) => {
         if (err.code === 'EADDRINUSE') {
-          resolve(this.findFreePort(startPort + 1));
+          resolve(this.findFreePort(testPort + 1));
         } else {
           reject(err);
         }
       });
-      server.listen(startPort, () => {
+      server.listen(testPort, () => {
         const port = (server.address() as net.AddressInfo).port;
         server.close(() => resolve(port));
       });

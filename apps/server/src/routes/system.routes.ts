@@ -5,14 +5,18 @@ import { providerRepository } from '@codecraft/db';
 
 export async function systemRoutes(server: FastifyInstance) {
   // System Health
-  server.get('/api/system/health', async () => {
+  const healthHandler = async () => {
     const dockerStatus = await isDockerAvailable();
     return {
       status: 'ok',
       dockerAvailable: dockerStatus,
       timestamp: new Date().toISOString(),
     };
-  });
+  };
+
+  server.get('/api/health', healthHandler);
+  server.get('/health', healthHandler);
+  server.get('/api/system/health', healthHandler);
 
   // Test AI Connection
   server.post('/api/system/test-ai', async (req) => {
