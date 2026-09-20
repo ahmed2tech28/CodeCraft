@@ -83,8 +83,8 @@ export class PreviewManager {
       Image: imageName,
       name: containerName,
       WorkingDir: '/workspace',
-      // Override CMD to run the dev server bound to 0.0.0.0 so it's reachable outside the container
-      Cmd: ['pnpm', 'dev', '--host', '0.0.0.0', '--port', '3000'],
+      // Ensure dependencies are installed and dev server starts bound to 0.0.0.0
+      Cmd: ['sh', '-c', 'if [ ! -d "node_modules" ] || [ ! -f "node_modules/.bin/vite" ]; then pnpm install; fi && pnpm dev'],
       Labels: {
         'codecraft.project.id': projectId,
         'codecraft.container.type': 'preview',

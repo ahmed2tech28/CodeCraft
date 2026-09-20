@@ -9,8 +9,8 @@ RUN apk add --no-cache \
     g++ \
     curl
 
-# Enable pnpm via corepack
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Install PNPM globally for immediate availability
+RUN npm install -g pnpm@10.34.5
 
 # Set working directory for project code (volume mounted from host)
 WORKDIR /workspace
