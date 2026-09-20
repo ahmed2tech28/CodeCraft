@@ -53,7 +53,7 @@ export async function agentRoutes(server: FastifyInstance) {
     const { id } = req.params as { id: string };
     const body = startAgentRunSchema.parse(req.body);
     const workspacePath = workspaceService.getWorkspacePath(id);
-    const workspaceHostPath = workspaceService.getWorkspaceHostPath(id);
+    const workspaceHostPath = await workspaceService.getWorkspaceHostPath(id);
 
     // 1. Get or create conversation & record user message
     const conversation = await conversationRepository.getOrCreateDefaultConversation(id);

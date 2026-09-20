@@ -2,6 +2,7 @@ import fs from 'fs-extra';
 import path from 'node:path';
 import { FileNode, IGNORED_DIRECTORIES } from '@codecraft/shared';
 import { templateService } from './template.service.js';
+import { toHostPath } from '../utils/docker-host-path.js';
 
 function findMonorepoRoot(startDir: string = process.cwd()): string {
   let curr = startDir;
@@ -33,20 +34,13 @@ export class WorkspaceService {
   }
 
   /**
-   * Resolves the host machine filesystem path for Docker volume binds.
-   * When running inside Docker, this returns the host path (e.g. /Users/.../data/projects/<id>)
-   * so the host Docker daemon can mount it into sandbox containers.
+   * Resolves the HOST machine path for spawning Docker child containers.
+   * Automatically detects the mapping by inspecting this container's own mounts.
+   * No user configuration required — works in any deployment.
    */
-  getWorkspaceHostPath(projectId: string): string {
-    const hostProjectsRoot = process.env.HOST_PROJECTS_ROOT;
-    if (hostProjectsRoot) {
-      return path.resolve(hostProjectsRoot, projectId);
-    }
-    const hostDataDir = process.env.HOST_DATA_DIR;
-    if (hostDataDir) {
-      return path.resolve(hostDataDir, 'projects', projectId);
-    }
-    return this.getWorkspacePath(projectId);
+  async getWorkspaceHostPath(projectId: string): Promise<string> {
+    const containerPath = this.getWorkspacePath(projectId);
+    return toHostPath(containerPath);
   }
 
   /**
