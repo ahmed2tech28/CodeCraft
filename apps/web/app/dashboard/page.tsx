@@ -388,7 +388,7 @@ export default function DashboardPage() {
                   className="w-full px-3.5 py-2 rounded-lg bg-zinc-900/80 border border-zinc-800 focus:border-purple-500 focus:outline-none text-sm text-zinc-100"
                 >
                   <option value="openrouter">OpenRouter (Free Models &amp; All Frontier Models)</option>
-                  <option value="gemini">Google Gemini (gemini-2.5-pro, gemini-2.0-flash…)</option>
+                  <option value="gemini">Google Gemini (Gemini 3.8 Flash, Gemini 3.8 Pro…)</option>
                   <option value="openai">OpenAI (GPT-4o, GPT-4o Mini)</option>
                   <option value="anthropic">Anthropic (Claude 3.5 Sonnet)</option>
                   <option value="ollama">Local Ollama (Offline / Private)</option>
