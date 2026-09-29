@@ -49,6 +49,11 @@ services:
       # Example: PUBLIC_HOST=192.168.1.100 or PUBLIC_HOST=myserver.example.com
       # Default: localhost (works for local dev without Docker networking issues)
       - PUBLIC_HOST=${PUBLIC_HOST:-localhost}
+      
+      # --- Inngest Dev Server Configuration ---
+      - INNGEST_EVENT_KEY=local
+      - INNGEST_SIGNING_KEY=local
+      - INNGEST_BASE_URL=http://inngest:8288
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -58,3 +63,11 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
+
+  inngest:
+    image: inngest/inngest:latest
+    container_name: codecraft-inngest
+    command: inngest dev -u http://codecraft:3001/api/inngest
+    restart: unless-stopped
+    ports:
+      - "8288:8288" # Inngest Dev Server UI and API
