@@ -132,12 +132,16 @@ export class AgentRunner {
         tools,
         maxSteps: options.maxSteps || 15,
         providerOptions: {
-          google: {
-            thinkingConfig: {
-              thinkingBudget: 0,
-              includeThoughts: false,
+          // thinkingConfig is only supported on gemini-2.5+ models
+          // Sending it to older models causes "Request contains an invalid argument" error
+          ...(resolvedModel?.startsWith('gemini-2.5') ? {
+            google: {
+              thinkingConfig: {
+                thinkingBudget: 0,
+                includeThoughts: false,
+              },
             },
-          },
+          } : {}),
         },
         onStepFinish: async (step) => {
           // Record any tool calls made in this turn
