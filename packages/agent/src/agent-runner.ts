@@ -132,12 +132,11 @@ export class AgentRunner {
         tools,
         maxSteps: options.maxSteps || 15,
         providerOptions: {
-          // thinkingConfig is only supported on specific gemini models
-          ...(resolvedModel?.startsWith('gemini-2.5') ? {
+          // Disable thinking budget for Gemini tool-calling steps to avoid missing thought_signature errors
+          ...(resolvedProvider === 'gemini' || resolvedModel?.includes('gemini') ? {
             google: {
               thinkingConfig: {
                 thinkingBudget: 0,
-                includeThoughts: false,
               },
             },
           } : {}),
