@@ -18,7 +18,12 @@ export function resolveAndValidateConfig(customConfig?: Partial<ResolvedModelCon
 
   let apiKey = customConfig?.apiKey;
   let baseUrl = customConfig?.baseUrl;
-  const model = customConfig?.model || process.env.AI_MODEL || DEFAULT_AI_MODEL;
+  let model = customConfig?.model || process.env.AI_MODEL || DEFAULT_AI_MODEL;
+
+  // Sanitize legacy or deprecated Gemini model names to gemini-3.8-flash
+  if (provider === 'gemini' && (!model || model.startsWith('gemini-1.') || model.startsWith('gemini-2.') || model.includes('lite'))) {
+    model = 'gemini-3.8-flash';
+  }
 
   // Resolve API key from environment if not provided explicitly
   if (!apiKey) {

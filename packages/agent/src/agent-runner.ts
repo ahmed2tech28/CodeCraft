@@ -132,8 +132,7 @@ export class AgentRunner {
         tools,
         maxSteps: options.maxSteps || 15,
         providerOptions: {
-          // thinkingConfig is only supported on gemini-2.5+ models
-          // Sending it to older models causes "Request contains an invalid argument" error
+          // thinkingConfig is only supported on specific gemini models
           ...(resolvedModel?.startsWith('gemini-2.5') ? {
             google: {
               thinkingConfig: {
