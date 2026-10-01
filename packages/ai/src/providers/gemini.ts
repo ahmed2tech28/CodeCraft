@@ -1,4 +1,4 @@
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import { LanguageModelV1 } from 'ai';
 import { ResolvedModelConfig } from '../types.js';
 
@@ -13,12 +13,10 @@ export function createGeminiModel(config: ResolvedModelConfig): LanguageModelV1 
     }
   }
 
-  const google = createGoogleGenerativeAI({
+  const googleGemini = createOpenAI({
     apiKey: apiKey || 'mock-key',
-    baseURL: config.baseUrl,
+    baseURL: config.baseUrl || 'https://generativelanguage.googleapis.com/v1beta/openai',
   });
 
-  return google(config.model, {
-    structuredOutputs: false,
-  });
+  return googleGemini(config.model);
 }

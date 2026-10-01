@@ -131,16 +131,6 @@ export class AgentRunner {
         prompt: `User Request: "${options.prompt}"\n\nInspect the project files, plan your changes, create/update components, and ensure the app is fully working.`,
         tools,
         maxSteps: options.maxSteps || 15,
-        providerOptions: {
-          // Disable thinking budget for Gemini tool-calling steps to avoid missing thought_signature errors
-          ...(resolvedProvider === 'gemini' || resolvedModel?.includes('gemini') ? {
-            google: {
-              thinkingConfig: {
-                thinkingBudget: 0,
-              },
-            },
-          } : {}),
-        },
         onStepFinish: async (step) => {
           // Record any tool calls made in this turn
           if (step.toolCalls && step.toolCalls.length > 0) {

@@ -1,1 +1,1 @@
-docker build -t codecraft-runner:latest -f docker/runner/Dockerfile .
+docker build -t codecraft-sandbox:latest -f docker/sandbox/Dockerfile .
