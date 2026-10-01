@@ -142,37 +142,23 @@ export const SUPPORTED_MODELS: Record<
   },
   gemini: {
     label: 'Google Gemini',
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-3.5-flash',
     models: [
-      'gemini-3.8-flash',
-      'gemini-3.8-pro',
       'gemini-3.5-flash',
-      'gemini-3.0-flash',
+      'gemini-2.5-flash',
     ],
     modelOptions: [
-      {
-        id: 'gemini-3.8-flash',
-        name: 'Gemini 3.8 Flash',
-        contextLength: 1048576,
-        description: 'Latest, highly capable, ultra-fast Gemini model — recommended',
-      },
-      {
-        id: 'gemini-3.8-pro',
-        name: 'Gemini 3.8 Pro',
-        contextLength: 1048576,
-        description: 'Most powerful Gemini model for complex reasoning and multi-file coding',
-      },
       {
         id: 'gemini-3.5-flash',
         name: 'Gemini 3.5 Flash',
         contextLength: 1048576,
-        description: 'Fast and reliable Gemini 3.5 model',
+        description: 'Latest, highly capable, ultra-fast Gemini 3 model — recommended',
       },
       {
-        id: 'gemini-3.0-flash',
-        name: 'Gemini 3.0 Flash',
+        id: 'gemini-2.5-flash',
+        name: 'Gemini 2.5 Flash',
         contextLength: 1048576,
-        description: 'Standard Gemini 3.0 Flash model',
+        description: 'Fast and reliable Gemini 2.5 Flash model',
       },
     ],
   },

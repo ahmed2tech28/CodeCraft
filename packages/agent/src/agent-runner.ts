@@ -131,6 +131,7 @@ export class AgentRunner {
         prompt: `User Request: "${options.prompt}"\n\nInspect the project files, plan your changes, create/update components, and ensure the app is fully working.`,
         tools,
         maxSteps: options.maxSteps || 15,
+        maxRetries: 5,
         onStepFinish: async (step) => {
           // Record any tool calls made in this turn
           if (step.toolCalls && step.toolCalls.length > 0) {

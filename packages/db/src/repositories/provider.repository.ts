@@ -16,8 +16,8 @@ export const providerRepository = {
       .where(eq(providerConfigs.isActive, true))
       .limit(1)
       .get();
-    if (result && result.provider === 'gemini' && (!result.model || result.model.startsWith('gemini-1.') || result.model.startsWith('gemini-2.') || result.model.includes('lite'))) {
-      result.model = 'gemini-3.8-flash';
+    if (result && result.provider === 'gemini' && (!result.model || (result.model !== 'gemini-3.5-flash' && result.model !== 'gemini-2.5-flash'))) {
+      result.model = 'gemini-3.5-flash';
     }
     return result || null;
   },
