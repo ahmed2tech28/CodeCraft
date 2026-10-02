@@ -13,6 +13,11 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       # Persistent SQLite DB and project workspaces
       - ./data:/app/data
+      # Monorepo packages source code live mounts
+      - ./packages/ai/src:/app/packages/ai/src
+      - ./packages/agent/src:/app/packages/agent/src
+      - ./packages/shared/src:/app/packages/shared/src
+      - ./packages/db/src:/app/packages/db/src
     environment:
       - NODE_ENV=production
       - PORT=3001

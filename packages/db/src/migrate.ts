@@ -2,11 +2,10 @@ import Database from 'better-sqlite3';
 import path from 'node:path';
 import fs from 'node:fs';
 
+import { getDbPath } from './client.js';
+
 export function runMigrations(dbPath?: string) {
-  const targetPath =
-    dbPath ||
-    process.env.DATABASE_URL ||
-    path.resolve(process.cwd(), 'data/db.sqlite');
+  const targetPath = getDbPath(dbPath);
 
   const dir = path.dirname(targetPath);
   if (!fs.existsSync(dir)) {

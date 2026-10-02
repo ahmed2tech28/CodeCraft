@@ -11,13 +11,26 @@ export interface InitDbOptions {
   dbPath?: string;
 }
 
+export function getDbPath(inputPath?: string): string {
+  if (inputPath) return path.resolve(inputPath);
+  const envUrl = process.env.DATABASE_URL;
+  if (envUrl) {
+    if (path.isAbsolute(envUrl)) return envUrl;
+    if (fs.existsSync('/app/data')) {
+      return path.resolve('/app/data', path.basename(envUrl));
+    }
+    return path.resolve(process.cwd(), envUrl);
+  }
+  if (fs.existsSync('/app/data')) {
+    return '/app/data/db.sqlite';
+  }
+  return path.resolve(process.cwd(), 'data/db.sqlite');
+}
+
 export function getDb(options?: InitDbOptions): BetterSQLite3Database<typeof schema> {
   if (_db) return _db;
 
-  const dbPath =
-    options?.dbPath ||
-    process.env.DATABASE_URL ||
-    path.resolve(process.cwd(), 'data/db.sqlite');
+  const dbPath = getDbPath(options?.dbPath);
 
   // Ensure target directory exists
   const dir = path.dirname(dbPath);
