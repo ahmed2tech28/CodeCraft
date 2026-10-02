@@ -11,6 +11,8 @@ import { systemRoutes } from './routes/system.routes.js';
 import { checkpointsRoutes } from './routes/checkpoints.routes.js';
 import { runStartupChecks } from './utils/startup-check.js';
 
+import { authGuard } from './middleware/auth.middleware.js';
+
 dotenv.config();
 
 // Ensure SQLite migrations are up to date on server start
@@ -22,8 +24,20 @@ const server = Fastify({
   },
 });
 
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(',')
+  : ['http://localhost:3000', 'http://127.0.0.1:3000'];
+
 await server.register(cors, {
-  origin: '*',
+  origin: (origin, cb) => {
+    // Allow requests with no origin (like mobile apps, curl, or same-origin)
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      cb(null, true);
+      return;
+    }
+    cb(null, false);
+  },
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 });
 
@@ -39,6 +53,9 @@ server.addContentTypeParser('application/json', { parseAs: 'string' }, (req, bod
     done(err as Error, undefined);
   }
 });
+
+// Authentication guard middleware hook
+server.addHook('onRequest', authGuard);
 
 // Register API Route Modules
 await server.register(authRoutes);

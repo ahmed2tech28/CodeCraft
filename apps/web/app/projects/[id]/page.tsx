@@ -606,6 +606,7 @@ export default function ProjectWorkspacePage() {
                       key={previewKey}
                       src={previewUrl}
                       title="CodeCraft Preview"
+                      sandbox="allow-scripts allow-forms allow-same-origin allow-modals allow-popups"
                       className="w-full h-full border-none"
                     />
                   </div>

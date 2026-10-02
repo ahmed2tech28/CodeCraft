@@ -96,7 +96,7 @@ export class PreviewManager {
         // Mount project workspace so edits from agent/UI are immediately visible in preview
         Binds: [`${workspaceHostPath}:/workspace`],
         PortBindings: {
-          '3000/tcp': [{ HostPort: port.toString() }],
+          '3000/tcp': [{ HostIp: '127.0.0.1', HostPort: port.toString() }],
         },
         AutoRemove: false,
       },

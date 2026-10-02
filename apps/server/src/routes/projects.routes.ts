@@ -23,10 +23,11 @@ export async function projectsRoutes(server: FastifyInstance) {
       if (firstUser) {
         userId = firstUser.id;
       } else {
+        const initialPassword = process.env.ADMIN_DEFAULT_PASSWORD || (await import('node:crypto')).randomBytes(16).toString('hex');
         const superUser = await userRepository.createSuperUser({
           name: 'Super Admin',
           email: 'admin@codecraft.local',
-          password: 'Password123!',
+          password: initialPassword,
         });
         userId = superUser.id;
       }

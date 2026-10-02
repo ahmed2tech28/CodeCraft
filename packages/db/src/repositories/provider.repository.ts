@@ -7,6 +7,8 @@ import {
   ProviderConfigInsert,
 } from '../schema/provider-configs.js';
 
+import { encryptSecret, decryptSecret } from '../crypto-utils.js';
+
 export const providerRepository = {
   async getActiveConfig(): Promise<ProviderConfigSelect | null> {
     const db = getDb();
@@ -16,10 +18,17 @@ export const providerRepository = {
       .where(eq(providerConfigs.isActive, true))
       .limit(1)
       .get();
-    if (result && result.provider === 'gemini' && (!result.model || (result.model !== 'gemini-3.5-flash' && result.model !== 'gemini-2.5-flash'))) {
+    if (!result) return null;
+
+    if (result.provider === 'gemini' && (!result.model || (result.model !== 'gemini-3.5-flash' && result.model !== 'gemini-2.5-flash'))) {
       result.model = 'gemini-3.5-flash';
     }
-    return result || null;
+
+    if (result.apiKeyEncrypted) {
+      result.apiKeyEncrypted = decryptSecret(result.apiKeyEncrypted);
+    }
+
+    return result;
   },
 
   async saveConfig(input: {
@@ -33,18 +42,24 @@ export const providerRepository = {
     db.update(providerConfigs).set({ isActive: false }).run();
 
     const id = randomUUID();
+    const encryptedKey = input.apiKey ? encryptSecret(input.apiKey) : null;
+
     const newConfig: ProviderConfigInsert = {
       id,
       provider: input.provider,
       model: input.model,
-      apiKeyEncrypted: input.apiKey || null,
+      apiKeyEncrypted: encryptedKey,
       baseUrl: input.baseUrl || null,
       isActive: true,
       createdAt: new Date().toISOString(),
     };
 
     db.insert(providerConfigs).values(newConfig).run();
-    return db.select().from(providerConfigs).where(eq(providerConfigs.id, id)).get()!;
+    const saved = db.select().from(providerConfigs).where(eq(providerConfigs.id, id)).get()!;
+    if (saved.apiKeyEncrypted) {
+      saved.apiKeyEncrypted = decryptSecret(saved.apiKeyEncrypted);
+    }
+    return saved;
   },
 
   async listConfigs(): Promise<ProviderConfigSelect[]> {

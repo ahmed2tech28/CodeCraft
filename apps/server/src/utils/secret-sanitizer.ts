@@ -23,6 +23,7 @@ export function sanitizeSecrets(text: string): string {
   let sanitized = text;
 
   // Mask known API key patterns
+  sanitized = sanitized.replace(/AIza[a-zA-Z0-9_-]{35}/gi, '[REDACTED_GEMINI_KEY]');
   sanitized = sanitized.replace(/sk-[a-zA-Z0-9_-]{20,}/gi, '[REDACTED_API_KEY]');
   sanitized = sanitized.replace(/sk-ant-[a-zA-Z0-9_-]{20,}/gi, '[REDACTED_ANTHROPIC_KEY]');
   sanitized = sanitized.replace(/sk-or-v1-[a-zA-Z0-9_-]{20,}/gi, '[REDACTED_OPENROUTER_KEY]');

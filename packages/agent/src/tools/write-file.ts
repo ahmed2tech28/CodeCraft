@@ -18,46 +18,38 @@ export function createWriteFileTool(context: AgentContext) {
       content: z.string().describe('The complete code/text content to write to the file'),
     }),
     execute: async ({ path: relPath, content }) => {
-      // Security: prevent path traversal
+      // Security: prevent path traversal and shell injection
       const normalized = path.normalize(relPath);
       if (normalized.startsWith('..') || path.isAbsolute(normalized)) {
         return { error: `Security violation: ${relPath} is outside workspace.` };
       }
 
+      // Strict path validation to prevent shell metacharacter injection
+      if (!/^[a-zA-Z0-9_\-\./]+$/.test(normalized)) {
+        return { error: `Security violation: ${relPath} contains illegal path characters.` };
+      }
+
+      // Safe write: write to host workspace path (synced directly into container via volume mount)
+      const targetPath = path.resolve(context.workspacePath, normalized);
+      if (!targetPath.startsWith(context.workspacePath)) {
+        return { error: `Security violation: ${relPath} is outside workspace.` };
+      }
+
+      await fs.ensureDir(path.dirname(targetPath));
+      await fs.writeFile(targetPath, content, 'utf-8');
+
       if (context.containerId) {
-        // Write inside the Docker container via exec — synced back to host via volume
+        // Optional verification inside container
         const containerPath = `/workspace/${normalized}`;
-        const dir = path.dirname(containerPath);
-
-        // Escape content for safe shell injection using base64 to avoid quote issues
+        const safeDir = path.dirname(containerPath).replace(/'/g, "'\\''");
+        const safePath = containerPath.replace(/'/g, "'\\''");
         const base64Content = Buffer.from(content, 'utf-8').toString('base64');
-        const mkdirResult = await containerManager.execCommand(
+        
+        await containerManager.execCommand(
           context.containerId,
-          `mkdir -p "${dir}"`,
+          `mkdir -p '${safeDir}' && echo '${base64Content}' | base64 -d > '${safePath}'`,
           { workingDir: '/workspace' }
         );
-
-        if (mkdirResult.exitCode !== 0) {
-          return { error: `Failed to create directory: ${mkdirResult.stderr}` };
-        }
-
-        const writeResult = await containerManager.execCommand(
-          context.containerId,
-          `echo "${base64Content}" | base64 -d > "${containerPath}"`,
-          { workingDir: '/workspace' }
-        );
-
-        if (writeResult.exitCode !== 0) {
-          return { error: `Failed to write file: ${writeResult.stderr}` };
-        }
-      } else {
-        // Fallback: write directly to host workspace (no container running)
-        const targetPath = path.resolve(context.workspacePath, normalized);
-        if (!targetPath.startsWith(context.workspacePath)) {
-          return { error: `Security violation: ${relPath} is outside workspace.` };
-        }
-        await fs.ensureDir(path.dirname(targetPath));
-        await fs.writeFile(targetPath, content, 'utf-8');
       }
 
       context.emitEvent({

@@ -23,58 +23,29 @@ export function createEditFileTool(context: AgentContext) {
         return { error: `Security violation: ${relPath} is outside workspace.` };
       }
 
-      if (context.containerId) {
-        // Read the current file content from container
-        const containerPath = `/workspace/${normalized}`;
-        const readResult = await containerManager.execCommand(
-          context.containerId,
-          `cat "${containerPath}"`,
-          { workingDir: '/workspace' }
-        );
-
-        if (readResult.exitCode !== 0) {
-          return { error: `File not found: ${relPath}. ${readResult.stderr}` };
-        }
-
-        const original = readResult.stdout;
-
-        if (!original.includes(targetSnippet)) {
-          return {
-            error: `Target snippet was not found in ${relPath}. Please use read_file to check exact lines before editing, or use write_file to overwrite the whole file.`,
-          };
-        }
-
-        const updated = original.replace(targetSnippet, replacementSnippet);
-
-        // Write the updated file back via base64 to handle special characters safely
-        const base64Content = Buffer.from(updated, 'utf-8').toString('base64');
-        const writeResult = await containerManager.execCommand(
-          context.containerId,
-          `echo "${base64Content}" | base64 -d > "${containerPath}"`,
-          { workingDir: '/workspace' }
-        );
-
-        if (writeResult.exitCode !== 0) {
-          return { error: `Failed to write updated file: ${writeResult.stderr}` };
-        }
-      } else {
-        // Fallback: direct host filesystem edit
-        const targetPath = path.resolve(context.workspacePath, normalized);
-        if (!targetPath.startsWith(context.workspacePath)) {
-          return { error: `Security violation: ${relPath} is outside workspace.` };
-        }
-        if (!(await fs.pathExists(targetPath))) {
-          return { error: `File not found: ${relPath}` };
-        }
-        const original = await fs.readFile(targetPath, 'utf-8');
-        if (!original.includes(targetSnippet)) {
-          return {
-            error: `Target snippet was not found in ${relPath}. Please use read_file to check exact lines before editing, or use write_file.`,
-          };
-        }
-        const updated = original.replace(targetSnippet, replacementSnippet);
-        await fs.writeFile(targetPath, updated, 'utf-8');
+      // Strict path validation to prevent shell metacharacter injection
+      if (!/^[a-zA-Z0-9_\-\./]+$/.test(normalized)) {
+        return { error: `Security violation: ${relPath} contains illegal path characters.` };
       }
+
+      const targetPath = path.resolve(context.workspacePath, normalized);
+      if (!targetPath.startsWith(context.workspacePath)) {
+        return { error: `Security violation: ${relPath} is outside workspace.` };
+      }
+
+      if (!(await fs.pathExists(targetPath))) {
+        return { error: `File not found: ${relPath}.` };
+      }
+
+      const original = await fs.readFile(targetPath, 'utf-8');
+      if (!original.includes(targetSnippet)) {
+        return {
+          error: `Target snippet was not found in ${relPath}. Please use read_file to check exact lines before editing, or use write_file to overwrite the whole file.`,
+        };
+      }
+
+      const updated = original.replace(targetSnippet, replacementSnippet);
+      await fs.writeFile(targetPath, updated, 'utf-8');
 
       context.emitEvent({
         type: 'file_change',

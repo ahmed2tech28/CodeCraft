@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { isDockerAvailable } from '@codecraft/sandbox';
 import { testProviderConnection } from '@codecraft/ai';
-import { providerRepository } from '@codecraft/db';
+import { providerRepository, maskApiKey } from '@codecraft/db';
 
 export async function systemRoutes(server: FastifyInstance) {
   // System Health
@@ -31,10 +31,17 @@ export async function systemRoutes(server: FastifyInstance) {
     return result;
   });
 
-  // Get active AI provider config
+  // Get active AI provider config (with API key masked for client security)
   server.get('/api/system/provider-config', async () => {
     const config = await providerRepository.getActiveConfig();
-    return { config };
+    if (!config) return { config: null };
+
+    const maskedConfig = {
+      ...config,
+      apiKeyEncrypted: maskApiKey(config.apiKeyEncrypted),
+      hasApiKey: Boolean(config.apiKeyEncrypted),
+    };
+    return { config: maskedConfig };
   });
 
   // Save / Update AI provider config
@@ -47,6 +54,11 @@ export async function systemRoutes(server: FastifyInstance) {
     };
 
     const config = await providerRepository.saveConfig(body);
-    return { success: true, config };
+    const maskedConfig = {
+      ...config,
+      apiKeyEncrypted: maskApiKey(config.apiKeyEncrypted),
+      hasApiKey: Boolean(config.apiKeyEncrypted),
+    };
+    return { success: true, config: maskedConfig };
   });
 }

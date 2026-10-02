@@ -47,11 +47,18 @@ export class WorkspaceService {
    * Resolves a file path strictly within the project workspace to prevent directory traversal attacks.
    */
   resolveSafePath(projectId: string, relativePath: string): string {
-    const projectRoot = this.getWorkspacePath(projectId);
-    // Normalize and resolve absolute target path
+    const rawRoot = this.getWorkspacePath(projectId);
+    const projectRoot = fs.existsSync(rawRoot) ? fs.realpathSync(rawRoot) : rawRoot;
     const resolvedPath = path.resolve(projectRoot, relativePath);
 
-    // Verify target path begins with projectRoot
+    if (fs.existsSync(resolvedPath)) {
+      const realTarget = fs.realpathSync(resolvedPath);
+      if (!realTarget.startsWith(projectRoot)) {
+        throw new Error(`Path traversal security violation: ${relativePath} resolves outside project workspace.`);
+      }
+      return realTarget;
+    }
+
     if (!resolvedPath.startsWith(projectRoot)) {
       throw new Error(`Path traversal security violation: ${relativePath} is outside project workspace.`);
     }

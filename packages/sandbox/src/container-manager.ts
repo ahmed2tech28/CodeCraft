@@ -57,6 +57,9 @@ export class ContainerManager {
         NanoCpus: nanoCpus,
         PidsLimit: pidsLimit,
         AutoRemove: false,
+        SecurityOpt: ['no-new-privileges:true'],
+        CapDrop: ['ALL'],
+        CapAdd: ['CHOWN', 'DAC_OVERRIDE', 'FOWNER', 'SETGID', 'SETUID'],
         NetworkMode: options.networkName || 'bridge',
       },
     })) as Docker.Container;
